@@ -59,8 +59,7 @@ def bits_to_text(bitstream: str) -> str:
     """Extract text from a bitstream, stopping at the EOF marker."""
     idx = bitstream.find(EOF_MARKER)
     if idx == -1:
-        # If no EOF found, try to decode whatever we have
-        idx = len(bitstream)
+        raise ValueError("No hidden data found in this image (EOF marker missing).")
     payload = bitstream[:idx]
 
     # Pad to byte boundary

@@ -98,6 +98,8 @@ async def extract(
 
     try:
         recovered = extract_text(image_bytes)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Extraction failed: {e}")
 
