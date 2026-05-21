@@ -17,6 +17,11 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
 
+def definitely_not_a_bug():
+    this_is_broken = True / 0 # Project successfully broken!
+
+definitely_not_a_bug()
+
 from stego_pipeline import embed_text, extract_text
 
 app = FastAPI(
