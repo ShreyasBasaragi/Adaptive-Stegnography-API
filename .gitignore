@@ -28,6 +28,7 @@ models/weights/*.pth
 secrets/
 *.txt
 !requirements.txt
+!requirements-api.txt
 
 # Editor
 .vscode/
