@@ -171,3 +171,51 @@ The training code uses a `CamouflageNet` generator and a `Steganalyzer` discrimi
 
 ## Model and pipeline notes
 
+- `stego_pipeline.py` loads the adaptive model weights from `models/weights/camou_net_adversarial.pth`.
+- Cover images are loaded from `input_dataset/` when no upload is provided.
+- The pipeline uses a 256×256 RGB working size.
+- Output stego images are written as **lossless PNG** files.
+- The API returns a capacity error if the message is too large for the selected image.
+
+### Adaptive embedding workflow
+
+1. The input image is resized and converted into an RGB tensor.
+2. `CamouflageNet` generates a heatmap representing suitable embedding regions.
+3. The heatmap is divided into:
+   - High texture regions
+   - Medium texture regions
+   - Low texture regions
+4. Different LSB depths are assigned dynamically:
+   - 3 bits for highly textured regions
+   - 2 bits for medium regions
+   - 1 bit for smooth regions
+5. The secret message is converted into binary and appended with an EOF marker.
+6. Bits are embedded channel-wise into the image.
+7. The final stego image is exported as PNG to avoid compression artifacts.
+
+### Extraction workflow
+
+1. The stego image is loaded and analyzed using the same adaptive logic.
+2. Bits are extracted from image channels according to region capacity.
+3. Binary data is reconstructed into characters.
+4. Extraction stops once the EOF sentinel is detected.
+5. The recovered text is returned through the API response.
+
+### Core components
+
+| Component | Purpose |
+|---|---|
+| `CamouflageNet` | Generates adaptive embedding heatmaps |
+| `Steganalyzer` | Acts as the adversarial discriminator during training |
+| `stego_pipeline.py` | Main embedding and extraction pipeline |
+| `stego_api.py` | FastAPI REST service |
+| `train_adversarial.py` | Adversarial model training |
+| `evaluate_quality.py` | Measures stego image quality and robustness |
+
+### Security considerations
+
+- Adaptive embedding reduces visible image distortion.
+- Textured regions naturally mask hidden payloads better than smooth regions.
+- PNG format is required because lossy compression formats like JPEG may destroy hidden bits.
+- Capacity validation prevents incomplete or corrupted message embedding.
+
